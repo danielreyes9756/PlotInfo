@@ -72,11 +72,12 @@ def filter_top_countries(df, country_column, top_n=10):
     return df[df[country_column].isin(top_countries)]
 
 
-def add_continent_column(df, countries_by_continent):
+def add_continent_column(df, column, countries_by_continent):
     """
     Adds a 'continent' column to the dataframe by mapping countries to their continents.
 
-    :param df: DataFrame with a column 'Entity' (country names).
+    :param df: DataFrame with a column (country names).
+    :param column: The countries name column.
     :param countries_by_continent: Dictionary with continents as keys and a list of countries as values.
     :return: DataFrame with the added 'continent' column.
     """
@@ -87,7 +88,7 @@ def add_continent_column(df, countries_by_continent):
             country_to_continent[country] = continent
 
     # Replace 'country' column with 'continent' column
-    df['continent'] = df['Entity'].map(country_to_continent)
+    df['continent'] = df[column].map(country_to_continent)
 
     return df
 
@@ -105,7 +106,7 @@ def plot_scatter():
     )
 
     # Map countries by continents
-    df_cleaned = add_continent_column(df_cleaned, countries_by_continent)
+    df_cleaned = add_continent_column(df_cleaned, 'Entity', countries_by_continent)
 
     # Group year and continent to calculate the average energy consumption by continent and year
     df_avg_consumption_by_continent_per_year =\
@@ -152,7 +153,7 @@ def plot_sunburst():
     df_cleaned['decade'] = (df_cleaned['Year'] // 10) * 10
 
     # Map countries by continents
-    df_cleaned = add_continent_column(df_cleaned, countries_by_continent)
+    df_cleaned = add_continent_column(df_cleaned, 'Entity', countries_by_continent)
 
     # Group year and continent to calculate the average energy consumption by continent and year
     df_avg_consumption_by_continent_per_decade =\
@@ -182,16 +183,7 @@ def plot_ridgeline():
     df_cleaned = load_and_clean_data('./datasets/lex.csv', ['country'])
 
     # Map countries by continents
-    country_to_continent = {}
-    for continent, countries in countries_by_continent.items():
-        for country in countries:
-            country_to_continent[country] = continent
-
-    # Replace 'country' column with 'continent' column
-    df_cleaned['continent'] = df_cleaned['country'].map(country_to_continent)
-
-    # Remove the 'country' column as we no longer need it
-    df_cleaned = df_cleaned.drop(columns=['country'])
+    df_cleaned = add_continent_column(df_cleaned, 'country', countries_by_continent)
 
     # Melt df (changing 'country' to 'continent')
     df_melted = df_cleaned.melt(id_vars='continent', var_name='year', value_name='lifeExp')
