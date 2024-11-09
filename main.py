@@ -50,7 +50,7 @@ def plot_scatter():
         x='Year',
         y='Primary energy consumption per capita (kWh/person)',
         color='Entity',
-        title='Primary Energy Consumption per Capita Over Time (5 countries)',
+        title='Primary Energy Consumption per Capita Over Time',
         labels={
             'Year': 'Year',
             'Primary energy consumption per capita (kWh/person)': 'Energy Consumption (kWh/person)',
