@@ -34,7 +34,7 @@ countries_by_continent = {
             "Canada", "United States", "Mexico", "Cuba", "Guatemala", "Honduras", "Jamaica", "Panama", "Dominica",
             "Haiti", "Dominican Republic", "Barbados", "Belize", "Saint Kitts and Nevis", "Saint Lucia", "Grenada",
             "Trinidad and Tobago", "Antigua and Barbuda", "Bahamas ", "Costa Rica", "El Salvador",
-            "Nicaragua",
+            "Nicaragua", "USA"
         ],
         "South America": [
             "Argentina", "Bolivia", "Brazil", "Chile", "Colombia", "Ecuador", "Guyana", "Paraguay", "Peru", "Suriname",
@@ -144,30 +144,25 @@ def plot_sunburst():
     """
 
     # Load and clean dataset
-    df_cleaned = load_and_clean_data(
-        './datasets/energy-use-per-person.csv',
-        ['Year', 'Primary energy consumption per capita (kWh/person)']
-    )
-
-    # Add a new column for grouping by decade
-    df_cleaned['decade'] = (df_cleaned['Year'] // 10) * 10
+    df_cleaned = load_and_clean_data('./datasets/cwurData.csv', ['country', 'institution'])
 
     # Map countries by continents
-    df_cleaned = add_continent_column(df_cleaned, 'Entity', countries_by_continent)
+    df_cleaned = add_continent_column(df_cleaned, 'country', countries_by_continent)
 
-    # Group year and continent to calculate the average energy consumption by continent and year
-    df_avg_consumption_by_continent_per_decade =\
-        df_cleaned.groupby(
-            ['decade', 'continent'],
-            as_index=False)['Primary energy consumption per capita (kWh/person)'].mean()
+    # Group by continent, country, and count institutions
+    df_grouped = df_cleaned.groupby(['continent', 'country'], as_index=False)['institution'].count()
+    df_grouped.rename(columns={'institution': 'num_universities'}, inplace=True)
 
     # Create the Sunburst plot
-    fig = px.sunburst(df_avg_consumption_by_continent_per_decade,
-                      path=['decade', 'continent'],
-                      values='Primary energy consumption per capita (kWh/person)',
-                      title='Average Primary Energy Consumption per Capita by Continent Over Time (Decade)',
-                      color='Primary energy consumption per capita (kWh/person)',
-                      template='plotly_white')
+    fig = px.sunburst(
+        df_grouped,
+        path=['continent', 'country'],
+        values='num_universities',
+        title='Universities per Country and Continent Distribution',
+        color='num_universities',
+        color_continuous_scale='viridis',
+        template='plotly_white'
+    )
 
     # Save as HTML
     fig.write_html("./views/sunburst.html")
